@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<html>
+<meta charset="UTF-8" >
+<head>
+  <link rel="stylesheet" href="./game.css">
+  <link rel="stylesheet" href="./keyboard.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bonobo">
+  <title>音游模式</title>
+</head>
+
+<body>
+<p id="difficulty"></p>
+<p id="environment"></p>
+<p id="sheet"></p>
+<script type="module" src="game.js">
+</script>
+<div id="screen" class="fullscreen-div">
+
+<div id="stage" class="stage-div">
+    <span id="playing-song-name"></span><br>
+    <b><span id="score" class="title"></span></b><br>
+    <span id="avg-diff" style="color: white"></span>
+    <div id="trigger-line"></div>
+    <div id="column1" class="column">
+        <div id="ptn1" class="trigger-point"></div>
+        <div id="line1" class="vert-line"></div>
+        <span class="btm" id="btm1">
+            <span class="kb-img-ctn">
+                <img id="keyS" class="kb-img" src="./keyboard/gameS.png" alt="keyS">
+            </span>
+        </span>
+    </div>
+    <div id="column2" class="column">
+        <div id="line2" class="vert-line"></div>
+        <div id="ptn2" class="trigger-point"></div>
+        <span class="btm" id="btm2">
+            <span class="kb-img-ctn">
+                <img id="keyD" class="kb-img" src="./keyboard/gameD.png" alt="keyD">
+            </span>
+        </span>
+    </div>
+    <div id="column3" class="column">
+        <div id="line3" class="vert-line"></div>
+        <div id="ptn3" class="trigger-point"></div>
+        <span class="btm" id="btm3">
+            <span class="kb-img-ctn">
+                <img id="keyF" class="kb-img" src="./keyboard/gameF.png" alt="keyF">
+            </span>
+        </span>
+    </div>
+    <div id="column4" class="column">
+        <div id="line4" class="vert-line"></div>
+        <div id="ptn4" class="trigger-point"></div>
+        <span class="btm" id="btm4">
+            <span class="kb-img-ctn">
+            </span>
+        </span>
+    </div>
+    <div id="column5" class="column">
+        <div id="line5" class="vert-line"></div>
+        <div id="ptn5" class="trigger-point"></div>
+        <span class="btm" id="btm5">
+            <span class="kb-img-ctn">
+                <img id="keyJ" class="kb-img" src="./keyboard/gameJ.png" alt="keyJ">
+            </span>
+        </span>
+    </div>
+    <div id="column6" class="column">
+        <div id="line6" class="vert-line"></div>
+        <div id="ptn6" class="trigger-point"></div>
+        <span class="btm" id="btm6">
+            <span class="kb-img-ctn">
+                <img id="keyK" class="kb-img" src="./keyboard/gameK.png" alt="keyK">
+            </span>
+        </span>
+    </div>
+    <div id="column7" class="column">
+        <div id="line7" class="vert-line"></div>
+        <div id="ptn7" class="trigger-point"></div>
+        <span class="btm" id="btm7">
+            <span class="kb-img-ctn">
+                <img id="keyL" class="kb-img" src="./keyboard/gameL.png" alt="keyL">
+            </span>
+        </span>
+    </div>
+</div>
+</div>
+</div>
+<div id="progress-line"></div>
+<div id="info-window" class="center-box">
+    <p>
+    <span class="title" id="song-name"></span><br>
+    <span class="bright" style="font-size: large" id="song-info"></span>
+    </p>
+    <p class="bright"><br>按空格键继续或暂停<br>按 ESC 键重新开始<br><br>按 Backspace 键返回主页.</p>
+</div>
+<div id="result-window" class="center-box">
+</div>
+
+</body>
+</html>
