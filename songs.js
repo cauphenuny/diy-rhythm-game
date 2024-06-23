@@ -120,7 +120,7 @@ var tutorial2 = `教程
 
 `;
 var bwv846 = 
-`巴赫C大调前奏曲
+`# 巴赫C大调前奏曲
 [[>>ADGQEGQEADGQEGQE/ASHWRHWRASHWRHWR/
 MSGWRGWRMSGWRGWR/ADGQEGQEADGQEGQE/
 <<ADHEYHEYADHEYHEY/>>AS+FHW+FHWAS+FHW+FHW/
@@ -140,7 +140,7 @@ BSGJRGJRBSGJRGJR/ZAG-JEG-JEZAG-JEG-JE/
 ZAFHQRQHQHFHFSFS/ZM%GJWRWJWJGJSFDS/]
 (%ZA%DGQ)]
 `;
-var haruhikage = `春日影
+var haruhikage = `# 春日影
 # 来源：https://www.bilibili.com/read/cv27118373/
 # 略有修改，使节奏正确。
 
@@ -357,7 +357,7 @@ var zenzenzense = `前前前世
 
 var sad_machine = {
     main: 
-`Sad Machine
+`# Sad Machine
 
 # 原曲：Porter Robinson
 # 钢琴改编：Xeuphoria
