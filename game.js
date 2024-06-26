@@ -39,25 +39,11 @@ let position = [];
 let available_key = "";
 
 const drop_time = 1200;
-const trigger_time = drop_time * 0.80 + delay;
-const start_pos = 0, end_pos = 85, trigger_pos = (trigger_time / drop_time) * (end_pos - start_pos) + start_pos;
+const trigger_time = drop_time * 0.85 + delay;
+const start_pos = 0, end_pos = 90, trigger_pos = (trigger_time / drop_time) * (end_pos - start_pos) + start_pos;
 const trigger_duration = trigger_pos - start_pos, all_duration = end_pos - start_pos;
 let is_playing = 0;
 
-for (let i = 1; i <= 7; i++) {
-    const pos = (i - 4) * 10 + 50;
-    position[i] = pos;
-    const buttom = document.getElementById("btm" + i);
-    buttom.style.left = "50%";
-    const line = document.getElementById('line' + i);
-    line.style.left = "50%";
-    const point = document.getElementById('ptn' + i);
-    point.style.left = "50%";
-    const column= document.getElementById('column' + i);
-    column.style.left = pos + "%";
-    const trigger_ptn = document.getElementById('ptn' + i);
-    trigger_ptn.style.top = trigger_pos + "%";
-}
 const trigger_line = document.getElementById('trigger-line');
 const screen = document.getElementById('screen');
 const info_window = document.getElementById('info-window');
@@ -71,6 +57,21 @@ if (is_tutorial == 1) {
     song_info = `${level2name[difficulty]} | bpm ${env.bpm} | 演示模式`;
 } else {
     song_info = `${level2name[difficulty]} | bpm ${env.bpm}`;
+}
+for (let i = 1; i <= 7; i++) {
+    const pos = (i - 4) * 10 + 50;
+    position[i] = pos;
+    const buttom = document.getElementById("btm" + i);
+    buttom.style.left = "50%";
+    const line = document.getElementById('line' + i);
+    line.style.left = "50%";
+    line.style.bottom = (100 - trigger_pos) + "%";
+    const point = document.getElementById('ptn' + i);
+    point.style.left = "50%";
+    const column= document.getElementById('column' + i);
+    column.style.left = pos + "%";
+    const trigger_ptn = document.getElementById('ptn' + i);
+    trigger_ptn.style.top = trigger_pos + "%";
 }
 
 song_info_element.innerHTML = song_info;
@@ -114,7 +115,7 @@ if (difficulty >= 2) {
 
 import { context, drum, piano, stroke } from "./player.js";
 
-const frame_rate = 120;
+const frame_rate = 60;
 
 let bgm = {
     notes: [],
@@ -171,6 +172,16 @@ for (let i = 1; i <= 7; i++) {
     stage.triggers[i] = new Set();
 }
 
+function brighten(element, list) {
+    let style = "";
+    for (let i = 0; i < list.length; i++) {
+        let radius = list[i][0], color = list[i][1];
+        style += `drop-shadow(0px 0px ${radius / 2}px ${color})`
+               + `drop-shadow(0px 0px ${radius}px ${color})`;
+    }
+    element.style.filter = style;
+}
+
 function draw_trigger(id) {
     const trigger = triggers[id];
     const col = trigger.column;
@@ -206,16 +217,16 @@ function remove_line(id) {
 const status_elements = document.getElementsByClassName('status');
 const perfect_time = 50, miss_time = 100, catch_time = 350;
 const levels = [
-    { score: 147, name: "SS"},
-    { score: 120, name: "S" },
-    { score:  97, name: "A+" },
-    { score:  93, name: "A" },
-    { score:  87, name: "A-" },
-    { score:  83, name: "B+" },
-    { score:  78, name: "B" },
-    { score:  70, name: "B-" },
-    { score:  60, name: "C" },
-    { score:   0, name: "D" },
+    { score: 147, name: "SS", sat: 80, hue: 0},
+    { score: 120, name: "S" , sat: 80, hue: 0},
+    { score:  97, name: "A+", sat: 80, hue: 10},
+    { score:  93, name: "A" , sat: 80, hue: 10},
+    { score:  87, name: "A-", sat: 80, hue: 10},
+    { score:  83, name: "B+", sat: 80, hue: 25},
+    { score:  78, name: "B" , sat: 80, hue: 25},
+    { score:  70, name: "B-", sat: 80, hue: 25},
+    { score:  60, name: "C" , sat: 80, hue: 40},
+    { score:   0, name: "D" , sat: 0,  hue: 0},
 ];
 
 let score = {
@@ -237,7 +248,7 @@ let score = {
 const id2note = ["hihat-close", "hihat-open"];
 
 function get_normalized_score() {
-    const expect = (score.miss + score.hit) * 5;
+    const expect = (score.hit + score.miss) * 5;
     const get = score.sum * (score.miss == 0 ? 1.5 : 1);
     const normalized = get / expect * 100;
     return normalized;
@@ -245,23 +256,52 @@ function get_normalized_score() {
 
 function get_rank() {
     const normalized = get_normalized_score();
-    let name = "D";
     console.log(`normalized score: ${normalized}`);
     for (let i = 0; i < levels.length; i++) {
         if (normalized >= levels[i].score) {
-            name = levels[i].name;
-            break;
+            return levels[i];
         }
     }
-    return name;
+    return levels[0];
 }
 
-function reflesh() {
+let keyframes = [
+    { combo: 0,    hue: 220, sat: 0 , radius: 15},
+    { combo: 30,   hue: 220, sat: 50, radius: 15},
+    { combo: 80,   hue: 60,  sat: 50, radius: 15},
+    { combo: 150,  hue: 0,   sat: 50, radius: 15},
+    { combo: 500,  hue: 0,   sat: 50, radius: 50},
+
+    { combo: 1e10, hue: 0,   sat: 50, radius: 50}, //inf
+];
+
+function refresh() {
     const score_element = document.getElementById('score');
     //score_element.innerHTML = `score: ${score.sum}, combo: ${score.combo}, rank: ${get_rank()}`
-    score_element.innerHTML = `${score.sum}&nbsp;`
+    let rank = get_rank();
+    score_element.innerHTML = `${score.sum}&nbsp; <img class="playing-level-img" src=./scores/${rank.name}.png></img> `;
+    brighten(score_element, [[8, `hsla(${rank.hue}, ${rank.sat}%, 85%, 85%)`]]);
     const diff_element = document.getElementById('avg-diff');
     diff_element.innerHTML = `avg: ${(score.diff_sum / score.hit).toFixed(2)}ms`;
+    const combo_element = document.getElementById('combo-title');
+    const combo_num_element = document.getElementById('combo-num');
+    combo_num_element.innerHTML = score.combo;
+    let color = "", shadow_color = "", border_color = "";
+    let len = keyframes.length
+    for (let i = 0; i < len; i++) {
+        if (score.combo >= keyframes[i].combo) {
+            let proportion = (score.combo - keyframes[i].combo) / (keyframes[i + 1].combo - keyframes[i].combo);
+            let hue = keyframes[i].hue + proportion * (keyframes[i + 1].hue - keyframes[i].hue);
+            let sat = keyframes[i].sat + proportion * (keyframes[i + 1].sat - keyframes[i].sat);
+            color = `hsl(${hue}, ${sat}%, 90%)`;
+            shadow_color = `hsl(${hue}, ${sat}%, 80%)`;
+            border_color = `hsl(${hue}, ${sat}%, 50%)`;
+        }
+    }
+    console.log(color);
+    combo_element.style.color = color;
+    combo_num_element.style.color = color;
+    brighten(combo_num_element, [[2, border_color], [20, shadow_color]]);
 }
 
 function draw_status(col, name) {
@@ -327,7 +367,7 @@ function hit(col) {
                 setTimeout(() => {remove_element(status_ele)}, 1000);
             }
         }
-        reflesh();
+        refresh();
     }
 }
 
@@ -347,10 +387,11 @@ function result() {
     screen.style.filter = "brightness(0.3)";
     result_window.innerHTML = ``;
     result_window.style.opacity = 1;
+    const rank = get_rank();
     result_window.innerHTML = 
 `
-<div id="result-window-level" style="padding: 3em; text-align: center;"> 
-    <img src=./scores/${get_rank()}.png class="result-level-img">
+<div id="result-level" style="padding: 3em; text-align: center;"> 
+    <img src=./scores/${rank.name}.png id="result-level-img">
 </div>
 <div id="result-window-info" style="padding: 3em"> 
     <p>
@@ -367,6 +408,7 @@ function result() {
     </p>
 </div>
 `;
+    brighten(document.getElementById('result-level-img'), [[16, `hsla(${rank.hue}, ${rank.sat}%, 70%, 0.8)`]]);
 }
 
 function resume() {
@@ -380,6 +422,7 @@ const events = [];
 
 function play() {
     score.init();
+    refresh();
     console.log(`------- start playing (bgm_count:${bgm.notes.length}) -------`);
     for (let i = 0; i < lines.length; i++) {
         events.push({
@@ -400,6 +443,7 @@ function play() {
             name: "add trigger",
             index: i,
         });
+        score.created++;
         events.push({
             time: tri.time - trigger_time + drop_time,
             name: "delete trigger",
@@ -416,7 +460,7 @@ function play() {
     const progress_line = document.getElementById("progress-line");
     function frame() {
         if (clock.is_paused()) return;
-        //console.log(`frame ${clock.get()} start`);
+        console.log(`frame ${clock.get()} start`);
         while (events.length - event_pos > 0) {
             const eve = events[event_pos];
             if (clock.get() > eve.time) {
@@ -437,7 +481,6 @@ function play() {
                         //console.log(`add trigger at ${column}`);
                         draw_trigger(eve.index);
                         stage.triggers[column].add(eve.index);
-                        score.created++;
                     break;
 
                     case "delete trigger":
@@ -513,7 +556,7 @@ function play() {
                         score.hit++;
                         score.perfect++;
                         score.sum += 5;
-                        reflesh();
+                        refresh();
                     }
                     if (time > trigger_time + miss_time) {
                         element.style.opacity = 0;
@@ -525,7 +568,7 @@ function play() {
                         setTimeout(() => {remove_element(status_ele)}, 1000);
                         score.combo = 0;
                         score.miss++;
-                        reflesh();
+                        refresh();
                     }
                 //console.log(`set #${id} to ${pos}%`);
                 }
@@ -538,7 +581,7 @@ function play() {
 }
 
 function code_wrap(code, env) {
-    let new_code = code + env.global_offset + env.fixed_offset[code % 12];
+    let new_code = code + env.global_offset + env.note_shift[code % 12];
     return new_code;
 }
 
