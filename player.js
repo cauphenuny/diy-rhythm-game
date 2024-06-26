@@ -52,7 +52,7 @@ export function set_offset(env, mode = 0, offset = 0) {
 export function env_verify(env) {
     const std = new environment;
     for (const key in std) {
-        if (env[key] == undefined) {
+        if (!(key in env)) {
             return false;
         }
     }
@@ -65,8 +65,8 @@ import { DrumMachine, SplendidGrandPiano } from "./library/smplr@0.15.1.mjs";
 export const context = new AudioContext();
 export const piano = new SplendidGrandPiano(context);
 export const drum = new DrumMachine(context);
-piano.output.setVolume(100);
-drum.output.setVolume(40);
+piano.output.setVolume(120);
+drum.output.setVolume(50);
 
 var timers = [];
 export function stroke(note, velc) {
