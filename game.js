@@ -1,6 +1,7 @@
 let tape = localStorage.getItem('tape');
 let env = JSON.parse(localStorage.getItem('env'));
 let delay = parseInt(localStorage.getItem('delay'));
+let drop_time = parseInt(localStorage.getItem('drop_time'));
 let is_tutorial = parseInt(localStorage.getItem('is_tutorial'));
 let difficulty = parseInt(localStorage.getItem('difficulty'));
 console.log("环境：", env);
@@ -38,7 +39,6 @@ let key2col = [];
 let position = [];
 let available_key = "";
 
-const drop_time = 1200;
 const trigger_time = drop_time * 0.85 + delay;
 const start_pos = 0, end_pos = 90, trigger_pos = (trigger_time / drop_time) * (end_pos - start_pos) + start_pos;
 const trigger_duration = trigger_pos - start_pos, all_duration = end_pos - start_pos;
@@ -115,7 +115,7 @@ if (difficulty >= 2) {
 
 import { context, drum, piano, stroke } from "./player.js";
 
-const frame_rate = 60;
+const frame_rate = 120;
 
 let bgm = {
     notes: [],
@@ -138,8 +138,10 @@ function create_clock() {
         pause_time = new Date().getTime();
     }
     function resume() {
-        start_time += new Date().getTime() - pause_time;
-        pause_time = 0;
+        if (pause_time != 0) {
+            start_time += new Date().getTime() - pause_time;
+            pause_time = 0;
+        }
     }
     function is_paused() {
         return pause_time != 0;
@@ -217,15 +219,15 @@ function remove_line(id) {
 const status_elements = document.getElementsByClassName('status');
 const perfect_time = 50, miss_time = 100, catch_time = 350;
 const levels = [
-    { score: 147, name: "SS", sat: 80, hue: 0},
-    { score: 120, name: "S" , sat: 80, hue: 0},
-    { score:  97, name: "A+", sat: 80, hue: 10},
-    { score:  93, name: "A" , sat: 80, hue: 10},
-    { score:  87, name: "A-", sat: 80, hue: 10},
-    { score:  83, name: "B+", sat: 80, hue: 25},
-    { score:  78, name: "B" , sat: 80, hue: 25},
-    { score:  70, name: "B-", sat: 80, hue: 25},
-    { score:  60, name: "C" , sat: 80, hue: 40},
+    { score: 147, name: "SS", sat: 50, hue: 0},
+    { score: 120, name: "S" , sat: 50, hue: 0},
+    { score:  97, name: "A+", sat: 50, hue: 10},
+    { score:  93, name: "A" , sat: 50, hue: 10},
+    { score:  87, name: "A-", sat: 50, hue: 10},
+    { score:  83, name: "B+", sat: 50, hue: 25},
+    { score:  78, name: "B" , sat: 50, hue: 25},
+    { score:  70, name: "B-", sat: 50, hue: 25},
+    { score:  60, name: "C" , sat: 50, hue: 40},
     { score:   0, name: "D" , sat: 0,  hue: 0},
 ];
 
@@ -256,7 +258,7 @@ function get_normalized_score() {
 
 function get_rank() {
     const normalized = get_normalized_score();
-    console.log(`normalized score: ${normalized}`);
+    //console.log(`normalized score: ${normalized}`);
     for (let i = 0; i < levels.length; i++) {
         if (normalized >= levels[i].score) {
             return levels[i];
@@ -280,7 +282,7 @@ function refresh() {
     //score_element.innerHTML = `score: ${score.sum}, combo: ${score.combo}, rank: ${get_rank()}`
     let rank = get_rank();
     score_element.innerHTML = `${score.sum}&nbsp; <img class="playing-level-img" src=./scores/${rank.name}.png></img> `;
-    brighten(score_element, [[8, `hsla(${rank.hue}, ${rank.sat}%, 85%, 85%)`]]);
+    brighten(score_element, [[2, `hsla(${rank.hue}, ${rank.sat}%, 85%, 90%)`]]);
     const diff_element = document.getElementById('avg-diff');
     diff_element.innerHTML = `avg: ${(score.diff_sum / score.hit).toFixed(2)}ms`;
     const combo_element = document.getElementById('combo-title');
@@ -298,7 +300,7 @@ function refresh() {
             border_color = `hsl(${hue}, ${sat}%, 50%)`;
         }
     }
-    console.log(color);
+    //console.log(color);
     combo_element.style.color = color;
     combo_num_element.style.color = color;
     brighten(combo_num_element, [[2, border_color], [20, shadow_color]]);
@@ -367,7 +369,6 @@ function hit(col) {
                 setTimeout(() => {remove_element(status_ele)}, 1000);
             }
         }
-        refresh();
     }
 }
 
@@ -456,11 +457,11 @@ function play() {
     //for (let i = 0; i < events.length; i++) console.log(events[i]);
     let event_pos = 0, bgm_pos = 0;
     let frame_time = 1000 / frame_rate;
-    let interval_id;
+    let interval_id, refresh_id;
     const progress_line = document.getElementById("progress-line");
     function frame() {
         if (clock.is_paused()) return;
-        console.log(`frame ${clock.get()} start`);
+        const start_time = clock.get();
         while (events.length - event_pos > 0) {
             const eve = events[event_pos];
             if (clock.get() > eve.time) {
@@ -495,6 +496,7 @@ function play() {
         }
         if (event_pos >= events.length) {
             clearInterval(interval_id);
+            clearInterval(refresh_id);
             if (is_playing == 1) {
                 is_playing = 0;
                 result();
@@ -574,10 +576,14 @@ function play() {
                 }
             });
         }
-        //console.log(`frame ${clock.get()} done`);
+        const duration = clock.get() - start_time;
+        if (duration >= 5) {
+            console.log(`warning: spent ${duration}ms`);
+        }
     }
     clock.start();
     interval_id = setInterval(frame, frame_time);
+    refresh_id = setInterval(refresh, frame_time * 12);
 }
 
 function code_wrap(code, env) {
@@ -827,7 +833,7 @@ function gamestart() {
     gameinit();
     function strong_beat(count) {
         const tmp = Math.round(count);
-        if (Math.abs(tmp - count) > 1e-10) return false;
+        if (Math.abs(tmp - count) > 1e-8) return false;
         if (beat[env.time1] != undefined) {
             return beat[env.time1][tmp % env.time1] > 0;
         } else {
@@ -835,12 +841,12 @@ function gamestart() {
         }
     }
     function int_beat(count) {
-        return Math.abs(Math.round(count) - count) <= 1e-10;
+        return Math.abs(Math.round(count) - count) <= 1e-8;
     }
     function semi_beat(count) {
         count *= 2;
         console.log(count);
-        if (Math.abs(Math.round(count) - count) <= 1e-10) return true;
+        if (Math.abs(Math.round(count) - count) <= 1e-8) return true;
         else {
             //console.log("check failed");
             return 0;
