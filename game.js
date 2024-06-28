@@ -7,6 +7,7 @@ let difficulty = parseInt(localStorage.getItem('difficulty'));
 console.log("环境：", env);
 console.log(`谱子：${tape}`);
 console.log(`延迟：${delay}`);
+console.log(`速度：${drop_time}`);
 tape = JSON.parse(tape);
 
 import { key2note, velocity_levels, velocity_adj, init_constants, beat } from './constants.js'
@@ -784,7 +785,7 @@ function parse(tape, check = [], cur_env) {
 
             default:
                 let cur_step = getTop(stack);
-                let note_code = code_wrap(key2note[key] + tmpoffset + octoffset * 12, cur_env);
+                let note_code = code_wrap(key2note[key], cur_env) + tmpoffset + octoffset * 12;
                 bgm.notes.push({
                     instrument: "piano",
                     options: {
