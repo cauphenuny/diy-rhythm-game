@@ -61,7 +61,7 @@ export var tutorial = {
 
 注意：此类变化音无法通过直接通过按键盘奏出
 
-转调：
+移调：
 简谱模式
 @[-1] [AAGGHHG./FFDDSSA.]
 @[+1] [AAGGHHG./FFDDSSA.]..../
